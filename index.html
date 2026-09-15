@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="vi">
 <head>
@@ -6,6 +5,13 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="theme-color" content="#0757c8">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon.svg">
   <title>Quản lý tài khoản Foods</title>
   <style>
     *{box-sizing:border-box}body{margin:0;background:#f4f7fc;color:#193454;font:16px/1.5 Arial,sans-serif}
@@ -23,7 +29,7 @@
   </style>
 </head>
 <body>
-  <header class="bar"><span class="brand">FOODS · TÀI KHOẢN</span><div class="actions"><button id="reload" disabled>Tải lại</button><a id="direct" target="_blank" rel="noopener noreferrer" hidden>Mở trực tiếp ↗</a></div></header>
+  <header class="bar"><span class="brand">FOODS · TÀI KHOẢN</span><div class="actions"><button id="install" hidden>Cài ứng dụng</button><button id="reload" disabled>Tải lại</button><a id="direct" target="_blank" rel="noopener noreferrer" hidden>Mở trực tiếp ↗</a></div></header>
   <section id="loading" class="loading" aria-live="polite">
     <div class="card">
       <div class="mark" aria-hidden="true"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2Z"/><circle cx="12" cy="13" r="2"/><path d="M12 15v2"/></svg></div>
@@ -39,7 +45,24 @@
     // CHỈ THAY DÒNG NÀY bằng URL triển khai Apps Script kết thúc bằng /exec.
     const APP_URL = 'https://script.google.com/macros/s/AKfycbxwePNVp_OPo4Zmc-padTdRaCp_iwN69ysEaQOyfO5-8YwFKdSvQjhTrKK-koNd51aBkw/exec';
     const $ = id => document.getElementById(id);
-    let url, timer;
+    let url, timer, deferredInstall;
+    window.addEventListener('beforeinstallprompt', event => {
+      event.preventDefault();
+      deferredInstall = event;
+      $('install').hidden = false;
+    });
+    $('install').addEventListener('click', async () => {
+      if (!deferredInstall) {
+        alert('Trên iPhone: bấm Chia sẻ → Thêm vào Màn hình chính.');
+        return;
+      }
+      deferredInstall.prompt();
+      await deferredInstall.userChoice;
+      deferredInstall = null;
+      $('install').hidden = true;
+    });
+    window.addEventListener('appinstalled', () => { $('install').hidden = true; });
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
     function start() {
       clearTimeout(timer);
       $('loading').hidden=false;$('spinner').hidden=false;$('help').hidden=true;
