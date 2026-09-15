@@ -1,0 +1,15 @@
+{
+  "name": "Quản lý tài khoản Foods",
+  "short_name": "Foods Accounts",
+  "description": "Tra cứu và quản lý tài khoản Zalo, Facebook, Gmail",
+  "lang": "vi-VN",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f7fc",
+  "theme_color": "#0757c8",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
