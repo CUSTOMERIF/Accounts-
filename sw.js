@@ -2,7 +2,10 @@ const CACHE = 'foods-accounts-shell-v1';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon.svg'];
 
 self.addEventListener('install', event => {
-  event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(CORE)));
+  // add() từng file để thiếu một tài nguyên không làm hỏng toàn bộ service worker.
+  event.waitUntil(caches.open(CACHE).then(async cache => {
+    await Promise.allSettled(CORE.map(file => cache.add(file)));
+  }));
   self.skipWaiting();
 });
 
