@@ -1,1 +1,75 @@
 
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>Quản lý tài khoản Foods</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;background:#f4f7fc;color:#193454;font:16px/1.5 Arial,sans-serif}
+    .bar{height:58px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 20px;background:white;border-bottom:1px solid #e1e8f2}
+    .brand{font-weight:700;letter-spacing:.5px}.actions{display:flex;gap:10px}button,a{font:inherit;font-size:14px;border:1px solid #dae3f0;border-radius:8px;background:white;color:#0757c8;padding:7px 11px;text-decoration:none;cursor:pointer}
+    button:focus-visible,a:focus-visible{outline:3px solid #80aff8;outline-offset:2px}button:disabled{opacity:.5;cursor:default}
+    iframe{display:block;width:100%;height:calc(100vh - 58px);height:calc(100dvh - 58px);border:0;background:white}
+    .loading{position:fixed;inset:58px 0 0;display:grid;place-items:center;background:#f4f7fc;padding:24px;z-index:5}
+    .card{text-align:center;width:min(100%,420px);padding:36px 25px;background:#fff;border:1px solid #e1e8f2;border-radius:20px;box-shadow:0 16px 50px #1d46760a}
+    .mark{display:grid;place-items:center;margin:0 auto 22px;width:66px;height:66px;background:#0757c8;color:white;border-radius:18px}
+    h1{font-size:23px;margin:0 0 10px}p{color:#73839b;font-size:15px;margin:0 0 22px}.spinner{width:28px;height:28px;margin:0 auto 20px;border:3px solid #e2ebfb;border-top-color:#0757c8;border-radius:50%;animation:spin .9s linear infinite}
+    .help{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}.primary{background:#0757c8;color:white;border-color:#0757c8}[hidden]{display:none!important}
+    @keyframes spin{to{transform:rotate(360deg)}}@media(prefers-reduced-motion:reduce){.spinner{animation:none}}
+    @media(max-width:520px){.bar{padding:10px 12px}.brand{font-size:14px}.actions{gap:6px}.actions a,.actions button{font-size:12px;padding:7px}.card{padding:30px 20px}}
+  </style>
+</head>
+<body>
+  <header class="bar"><span class="brand">FOODS · TÀI KHOẢN</span><div class="actions"><button id="reload" disabled>Tải lại</button><a id="direct" target="_blank" rel="noopener noreferrer" hidden>Mở trực tiếp ↗</a></div></header>
+  <section id="loading" class="loading" aria-live="polite">
+    <div class="card">
+      <div class="mark" aria-hidden="true"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2Z"/><circle cx="12" cy="13" r="2"/><path d="M12 15v2"/></svg></div>
+      <div id="spinner" class="spinner" aria-hidden="true"></div>
+      <h1 id="title">Đang mở ứng dụng</h1>
+      <p id="message">Đang tải trang quản lý tài khoản…</p>
+      <div id="help" class="help" hidden><a id="openApp" class="primary" target="_blank" rel="noopener noreferrer">Mở trực tiếp ↗</a><button id="showFrame">Xem khung ứng dụng</button></div>
+    </div>
+  </section>
+  <div id="frameHost"></div>
+  <noscript>Bạn cần bật JavaScript để mở ứng dụng.</noscript>
+  <script>
+    // CHỈ THAY DÒNG NÀY bằng URL triển khai Apps Script kết thúc bằng /exec.
+    const APP_URL = 'https://script.google.com/macros/s/AKfycbxwePNVp_OPo4Zmc-padTdRaCp_iwN69ysEaQOyfO5-8YwFKdSvQjhTrKK-koNd51aBkw/exec';
+    const $ = id => document.getElementById(id);
+    let url, timer;
+    function start() {
+      clearTimeout(timer);
+      $('loading').hidden=false;$('spinner').hidden=false;$('help').hidden=true;
+      $('title').textContent='Đang mở ứng dụng';$('message').textContent='Đang tải trang quản lý tài khoản…';
+      const frame=document.createElement('iframe');
+      frame.title='Web app quản lý tài khoản Foods';
+      frame.allow='clipboard-write';
+      frame.referrerPolicy='strict-origin-when-cross-origin';
+      // Sự kiện load chỉ cho biết khung đã điều hướng, không xác nhận đăng nhập thành công.
+      frame.addEventListener('load',()=>{clearTimeout(timer);$('loading').hidden=true;});
+      frame.src=url.href;
+      $('frameHost').replaceChildren(frame);
+      timer=setTimeout(()=>{
+        $('spinner').hidden=true;$('title').textContent='Bạn chưa thấy ứng dụng?';
+        $('message').textContent='Nếu Google yêu cầu đăng nhập hoặc không hiển thị trong khung, hãy chọn Mở trực tiếp.';
+        $('help').hidden=false;
+      },12000);
+    }
+    try {
+      url=new URL(APP_URL);
+      if(url.protocol!=='https:'||url.hostname!=='script.google.com'||!/^\/macros\/s\/[^/]+\/exec\/?$/.test(url.pathname))throw Error('invalid');
+      ['direct','openApp'].forEach(id=>$(id).href=url.href);
+      $('direct').hidden=false;$('reload').disabled=false;
+      $('reload').addEventListener('click',start);
+      $('showFrame').addEventListener('click',()=>{$('loading').hidden=true;});
+      start();
+    } catch(error) {
+      $('spinner').hidden=true;$('title').textContent='Chưa thêm link ứng dụng';
+      $('message').textContent='Mở index.html và thay APP_URL bằng đường dẫn Google Apps Script kết thúc bằng /exec.';
+    }
+  </script>
+</body>
+</html>
