@@ -1,99 +1,387 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="robots" content="noindex,nofollow">
-  <meta name="referrer" content="strict-origin-when-cross-origin">
-  <meta name="theme-color" content="#0757c8">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <link rel="manifest" href="manifest.webmanifest">
-  <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="icon.svg">
-  <title>Quản lý tài khoản Foods</title>
-  <style>
-    *{box-sizing:border-box}body{margin:0;background:#f4f7fc;color:#193454;font:16px/1.5 Arial,sans-serif}
-    .bar{height:58px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 20px;background:white;border-bottom:1px solid #e1e8f2}
-    .brand{font-weight:700;letter-spacing:.5px}.actions{display:flex;gap:10px}button,a{font:inherit;font-size:14px;border:1px solid #dae3f0;border-radius:8px;background:white;color:#0757c8;padding:7px 11px;text-decoration:none;cursor:pointer}
-    button:focus-visible,a:focus-visible{outline:3px solid #80aff8;outline-offset:2px}button:disabled{opacity:.5;cursor:default}
-    iframe{display:block;width:100%;height:calc(100vh - 58px);height:calc(100dvh - 58px);border:0;background:white}
-    .loading{position:fixed;inset:58px 0 0;display:grid;place-items:center;background:#f4f7fc;padding:24px;z-index:5}
-    .card{text-align:center;width:min(100%,420px);padding:36px 25px;background:#fff;border:1px solid #e1e8f2;border-radius:20px;box-shadow:0 16px 50px #1d46760a}
-    .mark{display:grid;place-items:center;margin:0 auto 22px;width:66px;height:66px;background:#0757c8;color:white;border-radius:18px}
-    h1{font-size:23px;margin:0 0 10px}p{color:#73839b;font-size:15px;margin:0 0 22px}.spinner{width:28px;height:28px;margin:0 auto 20px;border:3px solid #e2ebfb;border-top-color:#0757c8;border-radius:50%;animation:spin .9s linear infinite}
-    .help{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}.primary{background:#0757c8;color:white;border-color:#0757c8}[hidden]{display:none!important}
-    @keyframes spin{to{transform:rotate(360deg)}}@media(prefers-reduced-motion:reduce){.spinner{animation:none}}
-    @media(max-width:520px){.bar{padding:10px 12px}.brand{font-size:14px}.actions{gap:6px}.actions a,.actions button{font-size:12px;padding:7px}.card{padding:30px 20px}}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>SIM AI ADMIN</title>
+
+<meta name="theme-color" content="#081a31">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SIM AI ADMIN">
+
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+
+<style>
+:root{
+  --night:#061428;
+  --night2:#0a2742;
+  --cyan:#28e3d4;
+  --red:#ef3d4e;
+  --red2:#ff6671;
+  --gold:#ffd36f;
+  --gold2:#ffe8a6;
+  --white:#f7fbff;
+  --green:#26a66f;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{
+  margin:0;width:100%;height:100%;overflow:hidden;
+  font-family:Arial,Helvetica,sans-serif;background:var(--night)
+}
+body{position:fixed;inset:0}
+
+#appFrame{
+  position:fixed;inset:0;width:100%;height:100%;
+  border:0;display:block;background:#fff;
+  opacity:0;transform:scale(1.002);
+  transition:opacity .45s ease,transform .45s ease;
+}
+body.app-ready #appFrame{opacity:1;transform:scale(1)}
+
+#loading{
+  position:fixed;inset:0;z-index:20;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+  background:
+    radial-gradient(circle at 50% 22%,rgba(40,227,212,.09),transparent 26%),
+    radial-gradient(circle at 78% 22%,rgba(255,211,111,.08),transparent 24%),
+    linear-gradient(180deg,#061428 0%,#09213b 48%,#0d3150 100%);
+  transition:opacity .45s ease,visibility .45s ease;
+}
+#loading.hide{opacity:0;visibility:hidden;pointer-events:none}
+
+.skyGlow{
+  position:absolute;inset:0;opacity:.8;
+  background:
+    radial-gradient(circle at 20% 18%,rgba(255,255,255,.08),transparent 20%),
+    radial-gradient(circle at 82% 16%,rgba(255,203,113,.08),transparent 23%);
+}
+
+.moon{
+  position:absolute;top:6vh;right:9vw;
+  width:clamp(70px,21vw,108px);aspect-ratio:1;border-radius:50%;
+  background:radial-gradient(circle at 36% 34%,#ffffff 0 38%,#f7fbff 62%,#dae7f7 100%);
+  box-shadow:0 0 34px rgba(255,255,255,.18);
+}
+.moon:after{
+  content:"";position:absolute;inset:16% 12% 14% 24%;
+  border-radius:50%;opacity:.16;
+  background:
+    radial-gradient(circle at 28% 34%,#98a8be 0 4%,transparent 5%),
+    radial-gradient(circle at 66% 54%,#98a8be 0 5%,transparent 6%),
+    radial-gradient(circle at 48% 74%,#98a8be 0 3%,transparent 4%);
+}
+
+/* Tuyết */
+.snow{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.snow span{
+  position:absolute;top:-12px;border-radius:50%;
+  background:rgba(255,255,255,.96);
+  box-shadow:0 0 8px rgba(255,255,255,.28);
+  animation:snowFall linear infinite;
+}
+
+/* Đèn lồng Tết */
+.lanterns{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.lantern{
+  --x:50%;--delay:0s;--dur:9s;--size:28px;
+  position:absolute;left:var(--x);bottom:-76px;
+  width:var(--size);height:calc(var(--size)*1.22);
+  opacity:0;animation:floatLantern var(--dur) linear var(--delay) infinite;
+}
+.lantern:before{
+  content:"";position:absolute;left:13%;top:14%;width:74%;height:66%;
+  border-radius:46% 46% 40% 40%;
+  background:
+    radial-gradient(circle at 35% 27%,#fff0a4 0 8%,#ffca58 20%,#ef5b32 62%,#a52125 100%);
+  box-shadow:0 0 18px rgba(255,151,65,.42);
+}
+.lantern:after{
+  content:"";position:absolute;left:50%;top:0;width:1px;height:100%;
+  background:linear-gradient(#ffd36f 0 7%,transparent 7% 86%,#ffd36f 86%);
+  box-shadow:
+    -8px 17px 0 -0.2px rgba(255,211,111,.72),
+     8px 17px 0 -0.2px rgba(255,211,111,.72);
+}
+.lantern i{
+  position:absolute;left:26%;bottom:6%;width:48%;height:10%;
+  border-radius:50%;background:#ffd36f;
+  box-shadow:0 5px 9px rgba(255,177,60,.35);
+}
+.l1{--x:6%;--delay:-2s;--dur:10s;--size:24px}
+.l2{--x:18%;--delay:-6s;--dur:12s;--size:31px}
+.l3{--x:34%;--delay:-7s;--dur:9s;--size:21px}
+.l4{--x:62%;--delay:-3s;--dur:11s;--size:27px}
+.l5{--x:78%;--delay:-8s;--dur:10s;--size:22px}
+.l6{--x:91%;--delay:-4s;--dur:13s;--size:30px}
+
+/* Cành mai Tết */
+.blossom{
+  position:absolute;right:-20px;top:12%;width:180px;height:220px;
+  transform:rotate(-8deg);opacity:.86;pointer-events:none;
+}
+.branch{
+  position:absolute;right:52px;top:12px;width:8px;height:205px;
+  background:linear-gradient(#4c2f20,#7d4a2c);
+  border-radius:10px;transform:rotate(28deg);
+}
+.flower{
+  position:absolute;width:16px;height:16px;border-radius:50%;
+  background:radial-gradient(circle,#ff9f2f 0 18%,#ffd953 20% 58%,#fff0a3 60% 100%);
+  box-shadow:0 0 10px rgba(255,221,94,.35);
+}
+.f1{right:42px;top:36px}
+.f2{right:74px;top:74px;transform:scale(.8)}
+.f3{right:30px;top:112px;transform:scale(1.08)}
+.f4{right:88px;top:145px;transform:scale(.75)}
+.f5{right:54px;top:182px;transform:scale(.9)}
+
+/* Núi tuyết + cây thông */
+.scene{position:absolute;left:0;right:0;bottom:0;height:42%;overflow:hidden;pointer-events:none}
+.mountain{
+  position:absolute;bottom:10%;width:125%;height:56%;
+  border-radius:50% 50% 0 0;filter:blur(1px);
+}
+.m1{left:-35%;background:linear-gradient(180deg,rgba(34,77,107,.78),rgba(8,24,46,1))}
+.m2{right:-38%;bottom:5%;background:linear-gradient(180deg,rgba(48,92,123,.62),rgba(8,24,46,.99));transform:scale(.82)}
+.m3{left:-10%;bottom:-2%;background:linear-gradient(180deg,rgba(22,57,87,.92),rgba(6,19,37,1));transform:scale(.68)}
+.snowCap{
+  position:absolute;top:-2px;left:10%;right:10%;height:26%;
+  background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(229,244,255,.90));
+  border-radius:50% 50% 35% 35%;
+}
+.ground{
+  position:absolute;left:0;right:0;bottom:0;height:24%;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.17),rgba(220,238,250,.10)),
+    linear-gradient(180deg,rgba(40,227,212,.03),rgba(255,255,255,.04));
+}
+
+.tree{
+  position:absolute;bottom:12%;width:0;height:0;
+  border-left:18px solid transparent;border-right:18px solid transparent;
+  border-bottom:40px solid #197954;
+  filter:drop-shadow(0 5px 8px rgba(0,0,0,.18));
+}
+.tree:before,.tree:after{
+  content:"";position:absolute;left:-15px;width:0;height:0;
+  border-left:15px solid transparent;border-right:15px solid transparent
+}
+.tree:before{top:12px;border-bottom:34px solid #238f67}
+.tree:after{top:22px;left:-12px;border-left:12px solid transparent;border-right:12px solid transparent;border-bottom:28px solid #30aa7c}
+.tree i{position:absolute;left:-3px;bottom:-10px;width:6px;height:12px;background:#5a3b24;border-radius:2px}
+.t1{left:8%}
+.t2{left:18%;transform:scale(.82)}
+.t3{right:10%;transform:scale(1.04)}
+.t4{right:21%;transform:scale(.74)}
+
+.card{
+  position:relative;z-index:5;width:min(92vw,390px);
+  margin-top:-3vh;text-align:center;
+  display:flex;flex-direction:column;align-items:center;
+}
+.badge{
+  padding:8px 14px;border-radius:999px;
+  border:1px solid rgba(255,255,255,.16);
+  background:rgba(255,255,255,.07);
+  color:#eef9ff;font-size:12px;backdrop-filter:blur(6px);
+}
+.badge b{
+  display:inline-block;width:8px;height:8px;margin-right:7px;
+  border-radius:50%;background:var(--red2);
+  box-shadow:0 0 10px rgba(255,102,113,.85);
+}
+.logo{
+  width:clamp(112px,32vw,146px);
+  height:clamp(112px,32vw,146px);
+  margin:20px 0 14px;object-fit:contain;display:block;
+  border-radius:26%;
+  filter:drop-shadow(0 12px 25px rgba(0,0,0,.34));
+  animation:logoFloat 3s ease-in-out infinite;
+}
+.title{
+  margin:0;color:var(--cyan);
+  font-size:clamp(22px,7vw,30px);
+  line-height:1.12;font-weight:900;
+  letter-spacing:.4px;text-transform:uppercase;
+  text-shadow:0 0 18px rgba(40,227,212,.18);
+}
+.sub{margin-top:9px;color:#e9f7ff;font-size:14px;opacity:.94}
+.progress{
+  width:min(82vw,260px);height:8px;margin-top:18px;
+  border-radius:99px;overflow:hidden;background:rgba(255,255,255,.10)
+}
+.bar{
+  height:100%;width:12%;border-radius:inherit;
+  background:linear-gradient(90deg,#e43c50,#ffd36f,#28e3d4);
+  box-shadow:0 0 14px rgba(40,227,212,.25);
+  transition:width .25s ease;
+}
+.caption{margin-top:10px;color:rgba(233,247,255,.78);font-size:12px}
+.dots{display:flex;gap:7px;margin-top:14px}
+.dots i{width:7px;height:7px;border-radius:50%;background:#fff;animation:blink 1.2s ease-in-out infinite}
+.dots i:nth-child(2){animation-delay:.15s}
+.dots i:nth-child(3){animation-delay:.3s}
+
+@keyframes logoFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes blink{0%,80%,100%{opacity:.35;transform:scale(.8)}40%{opacity:1;transform:scale(1.15)}}
+@keyframes snowFall{
+  0%{transform:translate3d(0,-12px,0);opacity:0}
+  10%{opacity:.95}
+  100%{transform:translate3d(var(--drift),110vh,0);opacity:.18}
+}
+@keyframes floatLantern{
+  0%{transform:translate3d(0,0,0) rotate(-3deg) scale(.82);opacity:0}
+  10%{opacity:.82}
+  50%{transform:translate3d(15px,-48vh,0) rotate(5deg) scale(1)}
+  90%{opacity:.36}
+  100%{transform:translate3d(-12px,-105vh,0) rotate(-4deg) scale(.90);opacity:0}
+}
+@media(max-height:650px){
+  .moon{top:3vh}
+  .card{margin-top:-1vh}
+  .logo{margin:10px 0 8px;width:104px;height:104px}
+  .progress{margin-top:11px}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*:before,*:after{animation:none!important;transition:none!important}
+}
+</style>
 </head>
 <body>
-  <header class="bar"><span class="brand">FOODS · TÀI KHOẢN</span><div class="actions"><button id="install" hidden>Cài ứng dụng</button><button id="reload" disabled>Tải lại</button><a id="direct" target="_blank" rel="noopener noreferrer" hidden>Mở trực tiếp ↗</a></div></header>
-  <section id="loading" class="loading" aria-live="polite">
-    <div class="card">
-      <div class="mark" aria-hidden="true"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2Z"/><circle cx="12" cy="13" r="2"/><path d="M12 15v2"/></svg></div>
-      <div id="spinner" class="spinner" aria-hidden="true"></div>
-      <h1 id="title">Đang mở ứng dụng</h1>
-      <p id="message">Đang tải trang quản lý tài khoản…</p>
-      <div id="help" class="help" hidden><a id="openApp" class="primary" target="_blank" rel="noopener noreferrer">Mở trực tiếp ↗</a><button id="showFrame">Xem khung ứng dụng</button></div>
+
+<iframe
+  id="appFrame"
+  src="https://script.google.com/macros/s/AKfycbzngRBpafosDCB8N5oeWq0mYjqi5Kc5bIW6E4TsKVJ_f-gSp3Fh-6FWSGq7Ur8VHDzNXg/exec"
+  allow="clipboard-read; clipboard-write; fullscreen"
+  allowfullscreen
+  loading="eager"
+  title="SIM AI ADMIN"
+></iframe>
+
+<section id="loading" aria-label="Đang tải ứng dụng quản trị">
+  <div class="skyGlow"></div>
+  <div class="moon"></div>
+
+  <div class="snow" id="snowLayer"></div>
+
+  <div class="lanterns">
+    <span class="lantern l1"><i></i></span>
+    <span class="lantern l2"><i></i></span>
+    <span class="lantern l3"><i></i></span>
+    <span class="lantern l4"><i></i></span>
+    <span class="lantern l5"><i></i></span>
+    <span class="lantern l6"><i></i></span>
+  </div>
+
+  <div class="blossom">
+    <div class="branch"></div>
+    <span class="flower f1"></span>
+    <span class="flower f2"></span>
+    <span class="flower f3"></span>
+    <span class="flower f4"></span>
+    <span class="flower f5"></span>
+  </div>
+
+  <div class="scene">
+    <div class="mountain m1"><div class="snowCap"></div></div>
+    <div class="mountain m2"><div class="snowCap"></div></div>
+    <div class="mountain m3"><div class="snowCap"></div></div>
+
+    <div class="tree t1"><i></i></div>
+    <div class="tree t2"><i></i></div>
+    <div class="tree t3"><i></i></div>
+    <div class="tree t4"><i></i></div>
+
+    <div class="ground"></div>
+  </div>
+
+  <div class="card">
+    <div class="badge"><b></b>TẾT + NOEL • SIM AI ADMIN</div>
+    <img src="logo-loading.png" class="logo" alt="SIM AI ADMIN">
+    <h1 class="title">SIM AI ADMIN</h1>
+    <div class="progress">
+      <div class="bar" id="progressBar"></div>
     </div>
-  </section>
-  <div id="frameHost"></div>
-  <noscript>Bạn cần bật JavaScript để mở ứng dụng.</noscript>
-  <script>
-    // CHỈ THAY DÒNG NÀY bằng URL triển khai Apps Script kết thúc bằng /exec.
-    const APP_URL = 'https://script.google.com/macros/s/AKfycbzngRBpafosDCB8N5oeWq0mYjqi5Kc5bIW6E4TsKVJ_f-gSp3Fh-6FWSGq7Ur8VHDzNXg/exec';
-    const $ = id => document.getElementById(id);
-    let url, timer, deferredInstall;
-    window.addEventListener('beforeinstallprompt', event => {
-      event.preventDefault();
-      deferredInstall = event;
-      $('install').hidden = false;
-    });
-    $('install').addEventListener('click', async () => {
-      if (!deferredInstall) {
-        alert('Trên iPhone: bấm Chia sẻ → Thêm vào Màn hình chính.');
-        return;
-      }
-      deferredInstall.prompt();
-      await deferredInstall.userChoice;
-      deferredInstall = null;
-      $('install').hidden = true;
-    });
-    window.addEventListener('appinstalled', () => { $('install').hidden = true; });
-    if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
-    function start() {
-      clearTimeout(timer);
-      $('loading').hidden=false;$('spinner').hidden=false;$('help').hidden=true;
-      $('title').textContent='Đang mở ứng dụng';$('message').textContent='Đang tải trang quản lý tài khoản…';
-      const frame=document.createElement('iframe');
-      frame.title='Web app quản lý tài khoản Foods';
-      frame.allow='clipboard-write';
-      frame.referrerPolicy='strict-origin-when-cross-origin';
-      // Sự kiện load chỉ cho biết khung đã điều hướng, không xác nhận đăng nhập thành công.
-      frame.addEventListener('load',()=>{clearTimeout(timer);$('loading').hidden=true;});
-      frame.src=url.href;
-      $('frameHost').replaceChildren(frame);
-      timer=setTimeout(()=>{
-        $('spinner').hidden=true;$('title').textContent='Bạn chưa thấy ứng dụng?';
-        $('message').textContent='Nếu Google yêu cầu đăng nhập hoặc không hiển thị trong khung, hãy chọn Mở trực tiếp.';
-        $('help').hidden=false;
-      },12000);
-    }
-    try {
-      url=new URL(APP_URL);
-      if(url.protocol!=='https:'||url.hostname!=='script.google.com'||!/^\/macros\/s\/[^/]+\/exec\/?$/.test(url.pathname))throw Error('invalid');
-      ['direct','openApp'].forEach(id=>$(id).href=url.href);
-      $('direct').hidden=false;$('reload').disabled=false;
-      $('reload').addEventListener('click',start);
-      $('showFrame').addEventListener('click',()=>{$('loading').hidden=true;});
-      start();
-    } catch(error) {
-      $('spinner').hidden=true;$('title').textContent='Chưa thêm link ứng dụng';
-      $('message').textContent='Mở index.html và thay APP_URL bằng đường dẫn Google Apps Script kết thúc bằng /exec.';
-    }
-    
-  </script>
+    <div class="caption" id="loadingCaption">Vui lòng chờ trong giây lát</div>
+
+    <div class="dots"><i></i><i></i><i></i></div>
+  </div>
+</section>
+
+<script>
+(() => {
+  const frame = document.getElementById("appFrame");
+  const loading = document.getElementById("loading");
+  const bar = document.getElementById("progressBar");
+  const caption = document.getElementById("loadingCaption");
+  const snowLayer = document.getElementById("snowLayer");
+
+  /* Tuyết rơi nhẹ, ưu tiên mượt trên điện thoại */
+  const snowCount = window.innerWidth < 700 ? 34 : 48;
+  for(let i=0;i<snowCount;i++) {
+    const flake = document.createElement("span");
+    const size = (Math.random()*4 + 2).toFixed(1);
+    flake.style.left = (Math.random()*100) + "%";
+    flake.style.width = size + "px";
+    flake.style.height = size + "px";
+    flake.style.opacity = String(Math.random()*0.68 + 0.22);
+    flake.style.setProperty("--drift", ((Math.random()*86)-43).toFixed(0) + "px");
+    flake.style.animationDuration = (Math.random()*6 + 6).toFixed(2) + "s";
+    flake.style.animationDelay = (-Math.random()*12).toFixed(2) + "s";
+    snowLayer.appendChild(flake);
+  }
+
+  let progress = 12;
+  let done = false;
+
+  const texts = [
+    "Vui lòng chờ trong giây lát",
+    "Đang kết nối dữ liệu quản trị...",
+    "Đang chuẩn bị Dashboard SIM AI...",
+    "Sắp hoàn tất..."
+  ];
+
+  function textFor(v){
+    return v < 30 ? texts[0] :
+           v < 55 ? texts[1] :
+           v < 80 ? texts[2] : texts[3];
+  }
+
+  const timer = setInterval(() => {
+    if(done) return;
+    if(progress < 35) progress += Math.random()*5;
+    else if(progress < 60) progress += Math.random()*3;
+    else if(progress < 82) progress += Math.random()*1.8;
+    else if(progress < 92) progress += Math.random()*.7;
+
+    progress = Math.min(progress,92);
+    bar.style.width = progress + "%";
+    caption.textContent = textFor(progress);
+  },220);
+
+  function finish(){
+    if(done) return;
+    done = true;
+    clearInterval(timer);
+
+    bar.style.width = "100%";
+    caption.textContent = "Hoàn tất";
+    document.body.classList.add("app-ready");
+
+    setTimeout(() => loading.classList.add("hide"),180);
+  }
+
+  frame.addEventListener("load", () => {
+    setTimeout(finish,5000);
+  });
+
+  setTimeout(() => {
+    if(!done) finish();
+  },8500);
+})();
+</script>
 </body>
 </html>
